@@ -18,5 +18,11 @@ namespace Classcharts_app
         public string description { get; set; }
         public string teacher_name { get; set; }
         public string timestamp { get; set; }
+        public List<Attachment> attachments { get; set; }
+    }
+    internal class Attachment
+    {
+        public string filename { get; set; }
+        public string url { get; set; }
     }
 }
