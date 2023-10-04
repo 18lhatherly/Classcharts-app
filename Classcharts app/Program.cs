@@ -14,7 +14,7 @@ namespace Classcharts_app
         {
             const int pupilID = 4768732;
             const string loginEmail = "emma.hatherly@gmail.com";
-            const string recipientEmail = "adam@hatherly.com";
+            const string recipientEmail = "emma@hatherly.com";
             const string recipientName = "Emma Hatherly";
             const string senderEmail = "classcharts@hatherly.com";
 
@@ -26,6 +26,7 @@ namespace Classcharts_app
 
             string password = args[0];
             string APIkey = args[1];
+            SentAnnouncements sentAnnouncements = new SentAnnouncements();
 
             Console.WriteLine("Checking for new ClassCharts Announcements");
 
@@ -48,34 +49,43 @@ namespace Classcharts_app
             {
                 Console.WriteLine("Processing Announcement with title: " + announcement.title);
 
-                var emailOptions = new RestClientOptions("https://api.brevo.com/v3/smtp");
-                RestClient emailClient = new RestClient(emailOptions);
-                var emailRequest = new RestRequest("email", Method.Post);
-                emailRequest.AddHeader("Accept", "application/json");
-                emailRequest.AddHeader("api-key", APIkey);
-                Email email = new Email();
-                email.sender = new Sender("Classcharts", senderEmail);
-                email.to = new System.Collections.Generic.List<Sender>();
-                email.to.Add(new Sender(recipientName, recipientEmail));
-                email.subject = announcement.title;
-                email.htmlContent = "<p><b>Announcement Date Sent: " + announcement.timestamp + "</b></p>" +
-                                    "<p><b>Sender: " + announcement.teacher_name + "</b></p>";
-
-                foreach(Attachment attachment in announcement.attachments)
+                if (sentAnnouncements.alreadySent(announcement))
                 {
-                    if (email.attachment == null)
-                    {
-                        email.attachment = new System.Collections.Generic.List<EmailAttachment>();
-                    }
-                    email.attachment.Add(new EmailAttachment(attachment.filename, attachment.url));
+                    Console.WriteLine("Skipping - Announcement sent previously");
                 }
-                email.htmlContent = email.htmlContent + "<p></p>" + announcement.description;
+                else
+                {
+                    sentAnnouncements.addToSent(announcement);
+                    var emailOptions = new RestClientOptions("https://api.brevo.com/v3/smtp");
+                    RestClient emailClient = new RestClient(emailOptions);
+                    var emailRequest = new RestRequest("email", Method.Post);
+                    emailRequest.AddHeader("Accept", "application/json");
+                    emailRequest.AddHeader("api-key", APIkey);
+                    Email email = new Email();
+                    email.sender = new Sender("Classcharts", senderEmail);
+                    email.to = new System.Collections.Generic.List<Sender>();
+                    email.to.Add(new Sender(recipientName, recipientEmail));
+                    email.subject = announcement.title;
+                    email.htmlContent = "<p><b>Announcement Date Sent: " + announcement.timestamp + "</b></p>" +
+                                        "<p><b>Sender: " + announcement.teacher_name + "</b></p>";
 
-                emailRequest.AddJsonBody(email);
-                Task<RestResponse> t = emailClient.PostAsync(emailRequest);
-                var emailResponse = t.Result;
-                Console.WriteLine(emailResponse.Content);
+                    foreach (Attachment attachment in announcement.attachments)
+                    {
+                        if (email.attachment == null)
+                        {
+                            email.attachment = new System.Collections.Generic.List<EmailAttachment>();
+                        }
+                        email.attachment.Add(new EmailAttachment(attachment.filename, attachment.url));
+                    }
+                    email.htmlContent = email.htmlContent + "<p></p>" + announcement.description;
+
+                    emailRequest.AddJsonBody(email);
+                    Task<RestResponse> t = emailClient.PostAsync(emailRequest);
+                    var emailResponse = t.Result;
+                    Console.WriteLine(emailResponse.Content);
+                }
             }
+            sentAnnouncements.StoreSent();
             Console.WriteLine("Processing Complete");
             return 0;
         }
