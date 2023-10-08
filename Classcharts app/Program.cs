@@ -14,18 +14,20 @@ namespace Classcharts_app
         {
             const int pupilID = 4768732;
             const string loginEmail = "emma.hatherly@gmail.com";
-            const string recipientEmail = "emma@hatherly.com";
+            //const string recipientEmail = "emma@hatherly.com";
             const string recipientName = "Emma Hatherly";
             const string senderEmail = "classcharts@hatherly.com";
 
-            if (args.Length != 2)
+            if (args.Length != 3)
             {
-                System.Console.WriteLine("Please call this with two parameters - your classcharts password, and the Brevo API key");
+                System.Console.WriteLine("Please call this with three parameters - your classcharts password, and the Brevo API key, and the recipient email address");
                 return 1;
             }
 
             string password = args[0];
             string APIkey = args[1];
+            string recipientEmail = args[2];
+
             SentAnnouncements sentAnnouncements = new SentAnnouncements();
 
             Console.WriteLine("Checking for new ClassCharts Announcements");
