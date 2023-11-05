@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Web.ModelBinding;
-
-namespace Classcharts_app
+﻿namespace Classcharts_app
 {
     internal class LoginResponse
     {
